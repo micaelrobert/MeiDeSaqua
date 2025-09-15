@@ -1,39 +1,58 @@
 version: "3.8"
+
 services:
+  # --- SERVIÇO DO BACKEND (API JAVA) ---
   backend:
-    build: ./meidesaqua-backend-master        # usa o Dockerfile que está dentro da pasta backend
-    container_name: backend
+    build: ./meidesaqua-backend-master
+    container_name: meidesaqua-backend
     ports:
-      - "3030:3030"         # A porta padrão do Spring Boot é 8080, não 3000
+      # A porta padrão do Spring Boot é 8080. Mapeamos a porta 8080 do contêiner
+      # para a porta 8080 da sua máquina.
+      - "8080:8080"
     depends_on:
-      - db                  # só sobe depois que o banco estiver pronto
+      - db
+    # Variáveis de ambiente para o Spring Boot se conectar ao banco de dados.
+    # Elas sobrescrevem o application.properties para funcionar dentro do Docker.
     environment:
-      # As variáveis abaixo sobrescrevem o application.properties,
-      # permitindo a comunicação correta dentro do Docker.
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/meis_de_saqua?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_USERNAME=user_db
+      - SPRING_DATASOURCE_PASSWORD=pass_db
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: always
 
+  # --- SERVIÇO DO FRONTEND (SITE NEXT.JS) ---
   frontend:
-    build: ./MeideSaqua-main       # usa o Dockerfile que está dentro da pasta frontend
-    container_name: frontend
+    build: ./MeideSaqua-main
+    container_name: meidesaqua-frontend
     ports:
+      # Expõe a porta 3000 do contêiner para a porta 3000 da sua máquina.
       - "3000:3000"
+    # Garante que o frontend só suba depois que o backend estiver pronto.
+    depends_on:
+      - backend
+    # Passa a URL do backend para o frontend.
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8080
+    restart: always
 
+  # --- SERVIÇO DO BANCO DE DADOS ---
   db:
-    image: mariadb      # <--- ALTERADO: Usando a imagem oficial do MySQL
-    container_name: mysql   # <--- ALTERADO: Nome do contêiner para mysql
+    # CORREÇÃO: Usando a imagem oficial do MySQL para corresponder ao driver do backend.
+    image: mysql:8.0
+    container_name: meidesaqua-db
     restart: always
     environment:
-      MYSQL_DATABASE: meis_de_saqua       # <--- ALTERADO: Banco de dados do seu properties
-      MYSQL_USER: root                    # <--- ALTERADO: Criando um usuário
-      MYSQL_PASSWORD: samuel123            # <--- ALTERADO: Senha para o usuário
-      MYSQL_ROOT_PASSWORD: root_password  # <--- ALTERADO: Senha de root obrigatória
+      MYSQL_DATABASE: meis_de_saqua
+      MYSQL_USER: user_db # CORREÇÃO: Usuário consistente com o backend.
+      MYSQL_PASSWORD: pass_db # CORREÇÃO: Senha consistente com o backend.
+      MYSQL_ROOT_PASSWORD: root_password_muito_segura
     ports:
-      - "3306:3306"       # <--- ALTERADO: Porta padrão do MySQL
+      # Mapeia a porta do MySQL para acesso externo (opcional, bom para debug).
+      - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql # <--- ALTERADO: Volume para dados do MySQL
+      # Garante que os dados do banco não sejam perdidos.
+      - mysql_data:/var/lib/mysql
 
+# Define o volume nomeado para o banco de dados
 volumes:
-  mysql_data:               # <--- ALTERADO: Nome do volume para mysql
+  mysql_data:
