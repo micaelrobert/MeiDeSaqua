@@ -43,8 +43,8 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: meis_de_saqua
-      MYSQL_USER: user_db # CORREÇÃO: Usuário consistente com o backend.
-      MYSQL_PASSWORD: pass_db # CORREÇÃO: Senha consistente com o backend.
+      MYSQL_USER: root # CORREÇÃO: Usuário consistente com o backend.
+      MYSQL_PASSWORD: samuel123 # CORREÇÃO: Senha consistente com o backend.
       MYSQL_ROOT_PASSWORD: root_password_muito_segura
     ports:
       # Mapeia a porta do MySQL para acesso externo (opcional, bom para debug).
