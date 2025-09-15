@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  backend:
+    build: ./meidesaqua-backend-master        # usa o Dockerfile que está dentro da pasta backend
+    container_name: backend
+    ports:
+      - "3030:3030"         # A porta padrão do Spring Boot é 8080, não 3000
+    depends_on:
+      - db                  # só sobe depois que o banco estiver pronto
+    environment:
+      # As variáveis abaixo sobrescrevem o application.properties,
+      # permitindo a comunicação correta dentro do Docker.
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/meis_de_saqua?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_PROFILES_ACTIVE=local
+
+  frontend:
+    build: ./MeideSaqua-main       # usa o Dockerfile que está dentro da pasta frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+
+  db:
+    image: mariadb      # <--- ALTERADO: Usando a imagem oficial do MySQL
+    container_name: mysql   # <--- ALTERADO: Nome do contêiner para mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: meis_de_saqua       # <--- ALTERADO: Banco de dados do seu properties
+      MYSQL_USER: root                    # <--- ALTERADO: Criando um usuário
+      MYSQL_PASSWORD: samuel123            # <--- ALTERADO: Senha para o usuário
+      MYSQL_ROOT_PASSWORD: root_password  # <--- ALTERADO: Senha de root obrigatória
+    ports:
+      - "3306:3306"       # <--- ALTERADO: Porta padrão do MySQL
+    volumes:
+      - mysql_data:/var/lib/mysql # <--- ALTERADO: Volume para dados do MySQL
+
+volumes:
+  mysql_data:               # <--- ALTERADO: Nome do volume para mysql
