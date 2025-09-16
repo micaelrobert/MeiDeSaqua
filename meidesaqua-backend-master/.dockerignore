@@ -1,0 +1,34 @@
+# Pastas de controle de versão
+.git
+.gitignore
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.swp
+
+# Dependências de Node.js
+node_modules
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+
+# Dependências de Java
+target/
+*.jar
+*.war
+*.ear
+
+# Arquivos de build e distribuições
+dist/
+build/
+out/
+
+# Arquivos de IDEs/editores
+.vscode/
+.idea/
+*.iml
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
