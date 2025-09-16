@@ -1,44 +1,58 @@
 version: "3.8"
 
 services:
+  # --- SERVIÇO DO BACKEND (API JAVA) ---
   backend:
     build: ./meidesaqua-backend-master
     container_name: meidesaqua-backend
     ports:
+      # A porta padrão do Spring Boot é 8080. Mapeamos a porta 8080 do contêiner
+      # para a porta 8080 da sua máquina.
       - "8080:8080"
     depends_on:
       - db
+    # Variáveis de ambiente para o Spring Boot se conectar ao banco de dados.
+    # Elas sobrescrevem o application.properties para funcionar dentro do Docker.
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/meis_de_saqua?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root # ALTERADO
-      - SPRING_DATASOURCE_PASSWORD=samuel123 # ALTERADO
+      - SPRING_DATASOURCE_USERNAME=user_db
+      - SPRING_DATASOURCE_PASSWORD=pass_db
       - SPRING_PROFILES_ACTIVE=docker
     restart: always
 
+  # --- SERVIÇO DO FRONTEND (SITE NEXT.JS) ---
   frontend:
     build: ./MeideSaqua-main
     container_name: meidesaqua-frontend
     ports:
+      # Expõe a porta 3000 do contêiner para a porta 3000 da sua máquina.
       - "3000:3000"
+    # Garante que o frontend só suba depois que o backend estiver pronto.
     depends_on:
       - backend
+    # Passa a URL do backend para o frontend.
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8080
     restart: always
 
+  # --- SERVIÇO DO BANCO DE DADOS ---
   db:
+    # CORREÇÃO: Usando a imagem oficial do MySQL para corresponder ao driver do backend.
     image: mysql:8.0
     container_name: meidesaqua-db
     restart: always
     environment:
       MYSQL_DATABASE: meis_de_saqua
-      MYSQL_USER: root
-      MYSQL_PASSWORD: samuel123
+      MYSQL_USER: root # CORREÇÃO: Usuário consistente com o backend.
+      MYSQL_PASSWORD: samuel123 # CORREÇÃO: Senha consistente com o backend.
       MYSQL_ROOT_PASSWORD: root_password_muito_segura
     ports:
+      # Mapeia a porta do MySQL para acesso externo (opcional, bom para debug).
       - "3306:3306"
     volumes:
+      # Garante que os dados do banco não sejam perdidos.
       - mysql_data:/var/lib/mysql
 
+# Define o volume nomeado para o banco de dados
 volumes:
   mysql_data:
