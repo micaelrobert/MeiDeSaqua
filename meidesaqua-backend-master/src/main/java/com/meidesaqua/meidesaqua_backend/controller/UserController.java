@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.meidesaqua.meidesaqua_backend.controller.UpdateProfileRequest;
+import com.meidesaqua.meidesaqua_backend.controller.UpdatePasswordRequest;
 
 import java.util.Collections;
 
